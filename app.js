@@ -527,8 +527,48 @@
     stars.appendChild(frag);
   }
 
+  // ---------- Meteors / falling asteroids ----------
+  function spawnMeteor() {
+    const scene = $("scene");
+    if (!scene || document.hidden) return;
+    const m = document.createElement("div");
+    m.className = "meteor";
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const angleDeg = 22 + Math.random() * 34;        // travel angle below horizontal
+    const rad = (angleDeg * Math.PI) / 180;
+    const dist = H * (1.1 + Math.random() * 0.4);    // travel far enough to cross the screen
+    const dx = Math.cos(rad) * dist;
+    const dy = Math.sin(rad) * dist;
+    const len = 120 + Math.random() * 120;
+    const dur = 0.8 + Math.random() * 1.0;
+
+    // start along the top edge (and a bit off the left), so it falls down-right
+    m.style.left = `${-0.1 * W + Math.random() * W * 0.9}px`;
+    m.style.top = `${-40 - Math.random() * H * 0.2}px`;
+    m.style.setProperty("--len", `${len}px`);
+    m.style.setProperty("--ang", `${angleDeg}deg`);
+    m.style.setProperty("--dx", `${dx}px`);
+    m.style.setProperty("--dy", `${dy}px`);
+    m.style.animation = `meteorFall ${dur}s linear forwards`;
+
+    m.addEventListener("animationend", () => m.remove());
+    scene.appendChild(m);
+  }
+
+  function scheduleMeteor() {
+    const delay = 3500 + Math.random() * 6000;       // every ~3.5–9.5s
+    setTimeout(() => {
+      spawnMeteor();
+      if (Math.random() < 0.25) setTimeout(spawnMeteor, 300 + Math.random() * 400); // occasional shower
+      scheduleMeteor();
+    }, delay);
+  }
+
   // ---------- Init ----------
   buildStars();
+  scheduleMeteor();
   applyOrbits();
   setOrbitsPaused(true);
   applyModeColors();

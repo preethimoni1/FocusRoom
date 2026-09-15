@@ -73,6 +73,39 @@ body[data-mode="long"] .scene { --nebula: rgba(92, 184, 92, 0.18); }
   50% { opacity: 0.9; }
 }
 
+/* Meteors / asteroids streaking across space */
+.meteor {
+  position: absolute;
+  width: var(--len, 160px);
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 240, 210, 0.55) 60%, #fff 100%);
+  transform-origin: right center;
+  filter: drop-shadow(0 0 6px rgba(255, 220, 170, 0.8));
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.meteor::after {
+  /* the glowing asteroid head at the leading tip */
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translateY(-50%);
+  box-shadow: 0 0 8px 2px rgba(255, 225, 175, 0.9);
+}
+@keyframes meteorFall {
+  0%   { transform: translate3d(0, 0, 0) rotate(var(--ang)); opacity: 0; }
+  8%   { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--ang)); opacity: 0; }
+}
+
 /* Solar system now lives inside the timer, centered on it */
 .solar {
   position: absolute;
