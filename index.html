@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Focus — Pomodoro Timer</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%23ffb347%22/></svg>">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="scene" id="scene" aria-hidden="true">
+    <div class="nebula"></div>
+    <div class="stars" id="stars"></div>
+    <div class="scene-overlay"></div>
+  </div>
+
+  <header class="topbar">
+    <button class="icon-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  </header>
+
+  <main class="main">
+    <div class="timer-wrap">
+      <!-- orbiting planets, centered on the timer (sizes & speeds set from real data in app.js) -->
+      <div class="solar" id="solar">
+        <div class="orbit" data-planet="mercury"><span class="planet p-mercury" title="Mercury"></span></div>
+        <div class="orbit" data-planet="venus"><span class="planet p-venus" title="Venus"></span></div>
+        <div class="orbit" data-planet="earth"><span class="planet p-earth" title="Earth"></span></div>
+        <div class="orbit" data-planet="mars"><span class="planet p-mars" title="Mars"></span></div>
+        <div class="orbit" data-planet="jupiter"><span class="planet p-jupiter" title="Jupiter"></span></div>
+        <div class="orbit" data-planet="saturn"><span class="planet p-saturn" title="Saturn"><span class="saturn-ring"></span></span></div>
+        <div class="orbit" data-planet="uranus"><span class="planet p-uranus" title="Uranus"></span></div>
+        <div class="orbit" data-planet="neptune"><span class="planet p-neptune" title="Neptune"></span></div>
+        <div class="orbit" data-planet="pluto"><span class="planet p-pluto" title="Pluto (dwarf planet)"></span></div>
+      </div>
+
+      <!-- the sun; the timer sits exactly inside it -->
+      <div class="sun-disc"></div>
+
+      <svg class="ring" viewBox="0 0 320 320">
+        <circle class="ring-track" cx="160" cy="160" r="150" />
+        <circle class="ring-progress" id="ringProgress" cx="160" cy="160" r="150" />
+      </svg>
+
+      <div class="timer-center">
+        <div class="time" id="timeDisplay">25:00</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn ghost" id="resetBtn" title="Reset (R)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 1 3 6.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 8v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="ctrl-btn primary" id="startPauseBtn" title="Start/Pause (Space)">
+        <svg id="playIcon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="pauseIcon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+      </button>
+      <button class="ctrl-btn ghost" id="skipBtn" title="Skip to next">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 5l10 7-10 7V5z" fill="currentColor"/><rect x="17" y="5" width="2.5" height="14" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </main>
+
+  <!-- Right-side drawer -->
+  <div class="drawer-scrim" id="drawerScrim"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true">
+    <div class="drawer-header">
+      <h2 id="drawerTitle">Menu</h2>
+      <button class="icon-btn" id="closeDrawerBtn" aria-label="Close menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="settings-group">
+      <h3>Mode</h3>
+      <div class="mode-tabs" role="tablist" aria-label="Timer mode">
+        <button class="mode-tab active" data-mode="focus" role="tab" aria-selected="true">Focus</button>
+        <button class="mode-tab" data-mode="short" role="tab" aria-selected="false">Short Break</button>
+        <button class="mode-tab" data-mode="long" role="tab" aria-selected="false">Long Break</button>
+      </div>
+    </div>
+
+    <div class="drawer-stats">
+      <div class="stat-box"><span class="stat-num" id="todayCount">0</span><span class="stat-lbl">Today</span></div>
+      <div class="stat-box"><span class="stat-num" id="totalCount">0</span><span class="stat-lbl">All time</span></div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Durations (minutes)</h3>
+      <div class="settings-row">
+        <label for="focusDur">Focus</label>
+        <input type="number" id="focusDur" min="1" max="180" />
+      </div>
+      <div class="settings-row">
+        <label for="shortDur">Short Break</label>
+        <input type="number" id="shortDur" min="1" max="60" />
+      </div>
+      <div class="settings-row">
+        <label for="longDur">Long Break</label>
+        <input type="number" id="longDur" min="1" max="90" />
+      </div>
+      <div class="settings-row">
+        <label for="longEvery">Long break after (sessions)</label>
+        <input type="number" id="longEvery" min="2" max="12" />
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Behavior</h3>
+      <div class="settings-row toggle-row">
+        <label for="autoStartBreaks">Auto-start breaks</label>
+        <input type="checkbox" id="autoStartBreaks" />
+      </div>
+      <div class="settings-row toggle-row">
+        <label for="autoStartFocus">Auto-start next focus</label>
+        <input type="checkbox" id="autoStartFocus" />
+      </div>
+      <div class="settings-row toggle-row">
+        <label for="tickSound">Ticking sound</label>
+        <input type="checkbox" id="tickSound" />
+      </div>
+      <div class="settings-row toggle-row">
+        <label for="notifyToggle">Browser notifications</label>
+        <input type="checkbox" id="notifyToggle" />
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Sound</h3>
+      <div class="settings-row toggle-row">
+        <label for="muteToggle">Mute all sounds</label>
+        <input type="checkbox" id="muteToggle" />
+      </div>
+      <div class="settings-row" style="display:block">
+        <label style="display:block;margin-bottom:10px">Ambient sound</label>
+        <div class="ambient-options" id="ambientOptions">
+          <button class="ambient-btn active" data-sound="none">None</button>
+          <button class="ambient-btn" data-sound="rain">Rain</button>
+          <button class="ambient-btn" data-sound="white">White Noise</button>
+          <button class="ambient-btn" data-sound="brown">Brown Noise</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-footer">
+      <button class="ctrl-btn ghost text-btn" id="resetStatsBtn">Reset stats</button>
+      <button class="ctrl-btn primary text-btn" id="saveSettingsBtn">Save</button>
+    </div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>
